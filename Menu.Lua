@@ -219,7 +219,7 @@ local function buildUI()
         if hum then hum.WalkSpeed = v end
     end)
 
-    createSlider("Fly Speed", 20, 150, 50, function(v)
+    createSlider("Fly Speed", 20, 250, 50, function(v)
         flySpeed = v
     end)
 

@@ -12,7 +12,7 @@ screenGui.Name = "VinsMenu"
 screenGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 350, 0, 500)
+mainFrame.Size = UDim2.new(0, 350, 0, 540)
 mainFrame.Position = UDim2.new(0, 50, 0, 50)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 mainFrame.BackgroundTransparency = 0.15
@@ -329,7 +329,32 @@ local function buildUI()
         end
     end, flying)
 
-    -- **Add the Aim Lock (Closest) toggle button here**
+-- Rapid Fire toggle button
+createToggle("Rapid Fire", function(on)
+    if on then
+        -- Start rapid fire
+        if not _G.RapidFireConnection then
+            _G.RapidFireConnection = RunService.RenderStepped:Connect(function()
+                local mouse = player:GetMouse()
+                if mouse and mouse.Target and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
+                    -- Fire mouse click event rapidly
+                    mouse1press()
+                    wait(0.01) -- very small delay for rapid fire
+                    mouse1release()
+                end
+            end)
+        end
+    else
+        -- Stop rapid fire
+        if _G.RapidFireConnection then
+            _G.RapidFireConnection:Disconnect()
+            _G.RapidFireConnection = nil
+        end
+    end
+end, false)
+
+
+-- Replace the entire Aim Lock toggle UI with this simpler toggle button
 local function createAimlockToggle()
     local frame = Instance.new("Frame", container)
     frame.Size = UDim2.new(1, 0, 0, 50)
@@ -338,7 +363,7 @@ local function createAimlockToggle()
     local label = Instance.new("TextLabel", frame)
     label.Size = UDim2.new(0.6, 0, 1, 0)
     label.BackgroundTransparency = 1
-    label.Text = "Aim Lock (Closest)"
+    label.Text = "Aim Lock"
     label.TextColor3 = Color3.new(1, 1, 1)
     label.Font = Enum.Font.Gotham
     label.TextScaled = true
@@ -354,8 +379,6 @@ local function createAimlockToggle()
     Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
 
     local aimlockOn = false
-    local aimlockConnection = nil
-    local originalCameraCFrame = nil
 
     button.MouseButton1Click:Connect(function()
         aimlockOn = not aimlockOn
@@ -365,82 +388,22 @@ local function createAimlockToggle()
         }):Play()
 
         if aimlockOn then
-            -- Disable character rotation
-            local character = player.Character
-            if character then
-                local humanoid = character:FindFirstChildOfClass("Humanoid")
-                if humanoid then
-                    humanoid.AutoRotate = false
-                end
-            end
-
-            -- Save camera position
-            local cam = workspace.CurrentCamera
-            originalCameraCFrame = cam.CFrame
-
-            -- Run loop to lock view and face target
-            aimlockConnection = RunService.RenderStepped:Connect(function()
-                local cam = workspace.CurrentCamera
-                local camPos = cam.CFrame.Position
-
-                -- Find closest enemy
-                local closestPlayer = nil
-                local minDist = math.huge
-                for _, plr in pairs(Players:GetPlayers()) do
-                    if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                        -- Team check (optional)
-                        -- if player.Team ~= plr.Team then
-                        local hrp = plr.Character.HumanoidRootPart
-                        local dist = (hrp.Position - camPos).Magnitude
-                        if dist < minDist and dist <= 100 then -- within range
-                            minDist = dist
-                            closestPlayer = plr
-                        end
-                        -- end
-                    end
-                end
-
-                if closestPlayer and closestPlayer.Character then
-                    local hrp = closestPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        -- Lock camera onto target
-                        cam.CFrame = CFrame.new(cam.CFrame.Position, hrp.Position)
-
-                        -- Force character to face the target
-                        local character = player.Character
-                        local hrpChar = character and character:FindFirstChild("HumanoidRootPart")
-                        if hrpChar then
-                            hrpChar.CFrame = CFrame.lookAt(hrpChar.Position, hrp.Position)
-                        end
-                    end
-                end
-            end)
+            -- Run the external aimbot script once when toggled ON
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Aimbot-V3/main/src/Aimbot.lua"))()()
         else
-            -- Enable character rotation again
-            local character = player.Character
-            if character then
-                local humanoid = character:FindFirstChildOfClass("Humanoid")
-                if humanoid then
-                    humanoid.AutoRotate = true
-                end
-            end
-
-            -- Turn off loop
-            if aimlockConnection then
-                aimlockConnection:Disconnect()
-                aimlockConnection = nil
-            end
-
-            -- Reset camera
-            if originalCameraCFrame then
-                workspace.CurrentCamera.CFrame = originalCameraCFrame
-            end
+            -- You can add code here if you want to disable the aimbot,
+            -- but usually the external script handles its own toggling.
         end
     end)
 end
 
 createAimlockToggle()
 end
+
+
+
+
+
 
 -- Build UI initially
 buildUI()
@@ -488,3 +451,5 @@ UIS.InputBegan:Connect(function(input, gp)
         end
     end
 end)
+
+

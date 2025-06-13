@@ -12,7 +12,7 @@ screenGui.Name = "VinsMenu"
 screenGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 350, 0, 540)
+mainFrame.Size = UDim2.new(0, 350, 0, 600)
 mainFrame.Position = UDim2.new(0, 50, 0, 50)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 mainFrame.BackgroundTransparency = 0.15
@@ -353,6 +353,16 @@ createToggle("Rapid Fire", function(on)
     end
 end, false)
 
+-- ESP toggle button
+createToggle("ESP", function(on)
+    if on then
+        -- Run the ESP script once when toggled ON
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/vin-2-real/VinsRbxMenu/refs/heads/main/esp"))()()
+    else
+        -- You can add code here to disable ESP if you have one
+    end
+end, false)
+
 
 -- Replace the entire Aim Lock toggle UI with this simpler toggle button
 local function createAimlockToggle()
@@ -451,5 +461,4 @@ UIS.InputBegan:Connect(function(input, gp)
         end
     end
 end)
-
 

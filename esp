@@ -1,0 +1,96 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+local lines = {}
+local texts = {}
+
+-- Function to convert HSV to RGB (roblox's Color3 has Color3.fromHSV)
+local function getRainbowColor(t)
+    return Color3.fromHSV(t % 1, 1, 1) -- t cycles from 0 to 1 repeatedly
+end
+
+local function createOrUpdateLine(player)
+    if player == LocalPlayer or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+        if lines[player] then
+            lines[player]:Remove()
+            lines[player] = nil
+        end
+        return
+    end
+
+    local line = lines[player]
+    if not line then
+        line = Drawing.new("Line")
+        line.Thickness = 1
+        line.Transparency = 1
+        lines[player] = line
+    end
+
+    local camera = workspace.CurrentCamera
+    local rootPart = player.Character.HumanoidRootPart
+
+    local screenSize = camera.ViewportSize
+    local startPos = Vector2.new(screenSize.X / 2, screenSize.Y)
+
+    local endPos, onScreenEnd = camera:WorldToViewportPoint(rootPart.Position)
+    if onScreenEnd then
+        line.From = startPos
+        line.To = Vector2.new(endPos.X, endPos.Y)
+        line.Visible = true
+        line.Color = getRainbowColor(tick()) -- update color each frame
+    else
+        line.Visible = false
+    end
+end
+
+local function createOrUpdateText(player)
+    if player == LocalPlayer or not player.Character or not player.Character:FindFirstChild("Head") then
+        if texts[player] then
+            texts[player]:Remove()
+            texts[player] = nil
+        end
+        return
+    end
+
+    local text = texts[player]
+    if not text then
+        text = Drawing.new("Text")
+        text.Color = Color3.new(1, 1, 1)
+        text.Size = 14
+        text.Center = true
+        text.Outline = true
+        text.OutlineColor = Color3.new(0, 0, 0)
+        texts[player] = text
+    end
+
+    local camera = workspace.CurrentCamera
+    local head = player.Character.Head
+    local pos, onScreen = camera:WorldToViewportPoint(head.Position + Vector3.new(0, 1.5, 0))
+
+    if onScreen then
+        text.Position = Vector2.new(pos.X, pos.Y)
+        text.Text = player.Name
+        text.Visible = true
+    else
+        text.Visible = false
+    end
+end
+
+RunService.RenderStepped:Connect(function()
+    for _, player in pairs(Players:GetPlayers()) do
+        createOrUpdateLine(player)
+        createOrUpdateText(player)
+    end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    if lines[player] then
+        lines[player]:Remove()
+        lines[player] = nil
+    end
+    if texts[player] then
+        texts[player]:Remove()
+        texts[player] = nil
+    end
+end)

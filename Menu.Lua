@@ -330,7 +330,7 @@ local function buildUI()
     end, flying)
 
     -- **Add the Aim Lock (Closest) toggle button here**
-local function createAimLockToggle()
+local function createAimlockToggle()
     local frame = Instance.new("Frame", container)
     frame.Size = UDim2.new(1, 0, 0, 50)
     frame.BackgroundTransparency = 1
@@ -338,7 +338,7 @@ local function createAimLockToggle()
     local label = Instance.new("TextLabel", frame)
     label.Size = UDim2.new(0.6, 0, 1, 0)
     label.BackgroundTransparency = 1
-    label.Text = "Aim Lock (Face & Keep)"
+    label.Text = "Aim Lock (Closest)"
     label.TextColor3 = Color3.new(1, 1, 1)
     label.Font = Enum.Font.Gotham
     label.TextScaled = true
@@ -353,80 +353,94 @@ local function createAimLockToggle()
     button.TextScaled = true
     Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
 
-    local isAimLockActive = false
-    local aimLockLoop = nil
-    local currentTargetHRP = nil
-    local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+    local aimlockOn = false
+    local aimlockConnection = nil
+    local originalCameraCFrame = nil
 
     button.MouseButton1Click:Connect(function()
-        isAimLockActive = not isAimLockActive
-        button.Text = isAimLockActive and "ON" or "OFF"
+        aimlockOn = not aimlockOn
+        button.Text = aimlockOn and "ON" or "OFF"
         TweenService:Create(button, TweenInfo.new(0.2), {
-            BackgroundColor3 = isAimLockActive and Color3.fromRGB(70, 130, 180) or Color3.fromRGB(45, 45, 45)
+            BackgroundColor3 = aimlockOn and Color3.fromRGB(70, 130, 180) or Color3.fromRGB(45, 45, 45)
         }):Play()
 
-        if isAimLockActive then
-            -- Disable character auto-rotation
-            if humanoid then humanoid.AutoRotate = false end
-
-            -- Find initial closest enemy
-            local minDist = math.huge
-            local camPos = workspace.CurrentCamera.CFrame.Position
-            local closestP = nil
-            for _, plr in pairs(Players:GetPlayers()) do
-                if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                    local hrp = plr.Character.HumanoidRootPart
-                    local dist = (hrp.Position - camPos).Magnitude
-                    if dist < minDist and dist <= 100 then
-                        minDist = dist
-                        closestP = plr
-                    end
+        if aimlockOn then
+            -- Disable character rotation
+            local character = player.Character
+            if character then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid.AutoRotate = false
                 end
             end
-            currentTargetHRP = closestP and closestP.Character:FindFirstChild("HumanoidRootPart") or nil
 
-            -- Start loop to face target
-            aimLockLoop = RunService.RenderStepped:Connect(function()
-                -- Re-find the closest target every frame
-                local minDist2 = math.huge
-                local camPos2 = workspace.CurrentCamera.CFrame.Position
-                local closestP2 = nil
+            -- Save camera position
+            local cam = workspace.CurrentCamera
+            originalCameraCFrame = cam.CFrame
+
+            -- Run loop to lock view and face target
+            aimlockConnection = RunService.RenderStepped:Connect(function()
+                local cam = workspace.CurrentCamera
+                local camPos = cam.CFrame.Position
+
+                -- Find closest enemy
+                local closestPlayer = nil
+                local minDist = math.huge
                 for _, plr in pairs(Players:GetPlayers()) do
                     if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                        -- Team check (optional)
+                        -- if player.Team ~= plr.Team then
                         local hrp = plr.Character.HumanoidRootPart
-                        local dist = (hrp.Position - camPos2).Magnitude
-                        if dist < minDist2 and dist <= 100 then
-                            minDist2 = dist
-                            closestP2 = plr
+                        local dist = (hrp.Position - camPos).Magnitude
+                        if dist < minDist and dist <= 100 then -- within range
+                            minDist = dist
+                            closestPlayer = plr
+                        end
+                        -- end
+                    end
+                end
+
+                if closestPlayer and closestPlayer.Character then
+                    local hrp = closestPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        -- Lock camera onto target
+                        cam.CFrame = CFrame.new(cam.CFrame.Position, hrp.Position)
+
+                        -- Force character to face the target
+                        local character = player.Character
+                        local hrpChar = character and character:FindFirstChild("HumanoidRootPart")
+                        if hrpChar then
+                            hrpChar.CFrame = CFrame.lookAt(hrpChar.Position, hrp.Position)
                         end
                     end
                 end
-                currentTargetHRP = closestP2 and closestP2.Character:FindFirstChild("HumanoidRootPart") or nil
-
-                if currentTargetHRP then
-                    -- Face the target
-                    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        hrp.CFrame = CFrame.lookAt(hrp.Position, currentTargetHRP.Position)
-                    end
-                    -- Lock camera onto target
-                    local cam = workspace.CurrentCamera
-                    cam.CFrame = CFrame.new(cam.CFrame.Position, currentTargetHRP.Position)
-                end
             end)
         else
-            -- Re-enable character rotation
-            if humanoid then humanoid.AutoRotate = true end
-            if aimLockLoop then
-                aimLockLoop:Disconnect()
-                aimLockLoop = nil
+            -- Enable character rotation again
+            local character = player.Character
+            if character then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid.AutoRotate = true
+                end
+            end
+
+            -- Turn off loop
+            if aimlockConnection then
+                aimlockConnection:Disconnect()
+                aimlockConnection = nil
+            end
+
+            -- Reset camera
+            if originalCameraCFrame then
+                workspace.CurrentCamera.CFrame = originalCameraCFrame
             end
         end
     end)
 end
 
--- Call this inside your buildUI() where you add toggles
-createAimLockToggle()
+createAimlockToggle()
+end
 
 -- Build UI initially
 buildUI()

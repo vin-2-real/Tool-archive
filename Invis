@@ -1,39 +1,52 @@
 local key = Enum.KeyCode.Q -- key to toggle invisibility
 
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Click Q to toggle";
-                Duration = 1.5;
-                Text = "";
+-- Show toggle key notification at the start
+game.StarterGui:SetCore("SendNotification", {
+    Title = "Invisibility";
+    Text = "Click Q to toggle";
+    Duration = 3;
+})
 
---// dont edit script below
+--// don't edit script below
 local invis_on = false
-function onKeyPress(inputObject, chat)
-    if chat then return end
-    if inputObject.KeyCode == key then
-	    invis_on = not invis_on
-    	if invis_on then
-            local savedpos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-            wait()
-            game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-25.95, 84, 3537.55))
-            wait(.15)
-            local Seat = Instance.new('Seat', game.Workspace)
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == key then
+        invis_on = not invis_on
+        if invis_on then
+            local savedpos = player.Character.HumanoidRootPart.CFrame
+            task.wait()
+            player.Character:MoveTo(Vector3.new(-25.95, 84, 3537.55))
+            task.wait(0.15)
+
+            local Seat = Instance.new('Seat')
             Seat.Anchored = false
             Seat.CanCollide = false
             Seat.Name = 'invischair'
             Seat.Transparency = 1
             Seat.Position = Vector3.new(-25.95, 84, 3537.55)
-            local Weld = Instance.new("Weld", Seat)
+            Seat.Parent = workspace
+
+            local Weld = Instance.new("Weld")
             Weld.Part0 = Seat
-            Weld.Part1 = game.Players.LocalPlayer.Character:FindFirstChild("Torso") or game.Players.LocalPlayer.Character.UpperTorso
-            wait()
+            Weld.Part1 = player.Character:FindFirstChild("Torso") or player.Character:FindFirstChild("UpperTorso")
+            Weld.Parent = Seat
+
+            task.wait()
             Seat.CFrame = savedpos
+
             game.StarterGui:SetCore("SendNotification", {
                 Title = "Invis On";
                 Duration = 1;
                 Text = "";
             })
         else
-            workspace:FindFirstChild('invischair'):Remove()
+            local existingSeat = workspace:FindFirstChild('invischair')
+            if existingSeat then existingSeat:Destroy() end
             game.StarterGui:SetCore("SendNotification", {
                 Title = "Invis Off";
                 Duration = 1;
@@ -41,6 +54,4 @@ function onKeyPress(inputObject, chat)
             })
         end
     end
-end
-
-game:GetService("UserInputService").InputBegan:connect(onKeyPress)
+end)

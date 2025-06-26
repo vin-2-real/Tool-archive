@@ -48,6 +48,7 @@ local Top = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 local TextBox = Instance.new("TextBox")
 local TextButton = Instance.new("TextButton")
+local CloseButton = Instance.new("TextButton") -- ❌ Close Button
 
 h.Name = "h"
 h.Parent = game:GetService("CoreGui")
@@ -80,6 +81,25 @@ Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextScaled = true
 Title.TextSize = 14
 Title.TextWrapped = true
+
+-- ❌ Close Button Setup
+CloseButton.Name = "CloseButton"
+CloseButton.Parent = Top
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+CloseButton.BorderSizePixel = 0
+CloseButton.Position = UDim2.new(1, -40, 0, 0)
+CloseButton.Size = UDim2.new(0, 40, 0, 44)
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextScaled = true
+CloseButton.TextSize = 14
+CloseButton.TextWrapped = true
+
+-- ❌ Close Button Functionality
+CloseButton.MouseButton1Click:Connect(function()
+	h:Destroy()
+end)
 
 TextBox.Parent = Main
 TextBox.BackgroundColor3 = Color3.fromRGB(49, 49, 49)

@@ -354,7 +354,7 @@ createToggle("Rapid Fire", function(on)
 end, false)
 
 -- ESP toggle button
-createToggle("ESP", function(on)
+createToggle("Aimbot Menu", function(on)
     if on then
         -- Run the ESP script once when toggled ON
         loadstring(game:HttpGet("https://raw.githubusercontent.com/vin-2-real/VinsRbxMenu/refs/heads/main/esp"))()()

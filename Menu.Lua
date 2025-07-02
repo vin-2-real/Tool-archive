@@ -363,58 +363,6 @@ createToggle("Aimbot Menu", function(on)
     end
 end, false)
 
-
--- Replace the entire Aim Lock toggle UI with this simpler toggle button
-local function createAimlockToggle()
-    local frame = Instance.new("Frame", container)
-    frame.Size = UDim2.new(1, 0, 0, 50)
-    frame.BackgroundTransparency = 1
-
-    local label = Instance.new("TextLabel", frame)
-    label.Size = UDim2.new(0.6, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = "Aim Lock"
-    label.TextColor3 = Color3.new(1, 1, 1)
-    label.Font = Enum.Font.Gotham
-    label.TextScaled = true
-
-    local button = Instance.new("TextButton", frame)
-    button.Size = UDim2.new(0.3, 0, 0.7, 0)
-    button.Position = UDim2.new(0.65, 0, 0.15, 0)
-    button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    button.Text = "OFF"
-    button.Font = Enum.Font.Gotham
-    button.TextColor3 = Color3.new(1, 1, 1)
-    button.TextScaled = true
-    Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-
-    local aimlockOn = false
-
-    button.MouseButton1Click:Connect(function()
-        aimlockOn = not aimlockOn
-        button.Text = aimlockOn and "ON" or "OFF"
-        TweenService:Create(button, TweenInfo.new(0.2), {
-            BackgroundColor3 = aimlockOn and Color3.fromRGB(70, 130, 180) or Color3.fromRGB(45, 45, 45)
-        }):Play()
-
-        if aimlockOn then
-            -- Run the external aimbot script once when toggled ON
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Aimbot-V3/main/src/Aimbot.lua"))()()
-        else
-            -- You can add code here if you want to disable the aimbot,
-            -- but usually the external script handles its own toggling.
-        end
-    end)
-end
-
-createAimlockToggle()
-end
-
-
-
-
-
-
 -- Build UI initially
 buildUI()
 

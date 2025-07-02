@@ -74,7 +74,7 @@ do
 end
 
 -- Variables
-local flySpeed = 50
+local flySpeed = 80
 local lockYEnabled = false
 local lockYConnection = nil
 local noclipEnabled = false
@@ -284,25 +284,18 @@ local function buildUI()
     end, false)
 
     -- Lock Y Position toggle
-    createToggle("Lock Y Position", function(on)
-        lockYEnabled = on
-        local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-        if on and root then
-            local frozenY = root.Position.Y
-            lockYConnection = RunService.Heartbeat:Connect(function()
-                if root and root.Parent then
-                    local pos = root.Position
-                    local cf = root.CFrame
-                    root.CFrame = CFrame.new(pos.X, frozenY, pos.Z) * CFrame.Angles(cf:ToEulerAnglesXYZ())
-                end
-            end)
-        else
-            if lockYConnection then
-                lockYConnection:Disconnect()
-                lockYConnection = nil
-            end
+    createToggle("invisible (Q)", function(on)
+    if on then
+        -- Run external rapid fire script
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/vin-2-real/VinsRbxMenu/refs/heads/main/Invis"))()
+    else
+        -- Stop rapid fire
+        if _G.RapidFireConnection then
+            _G.RapidFireConnection:Disconnect()
+            _G.RapidFireConnection = nil
         end
-    end, false)
+    end
+end, false)
 
     -- Noclip toggle
     createToggle("Noclip", function(on)
@@ -321,7 +314,7 @@ local function buildUI()
     end, false)
 
     -- Fly toggle button
-    createToggle("Fly", function(on)
+    createToggle("Fly (F)", function(on)
         if on then
             startFly()
         else
@@ -329,21 +322,11 @@ local function buildUI()
         end
     end, flying)
 
--- Rapid Fire toggle button
-createToggle("Rapid Fire", function(on)
+-- Fling toggle button
+createToggle("Fling", function(on)
     if on then
-        -- Start rapid fire
-        if not _G.RapidFireConnection then
-            _G.RapidFireConnection = RunService.RenderStepped:Connect(function()
-                local mouse = player:GetMouse()
-                if mouse and mouse.Target and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-                    -- Fire mouse click event rapidly
-                    mouse1press()
-                    wait(0.01) -- very small delay for rapid fire
-                    mouse1release()
-                end
-            end)
-        end
+        -- Run external rapid fire script
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/vin-2-real/VinsRbxMenu/refs/heads/main/Fling"))()
     else
         -- Stop rapid fire
         if _G.RapidFireConnection then
@@ -354,7 +337,7 @@ createToggle("Rapid Fire", function(on)
 end, false)
 
 -- ESP toggle button
-createToggle("Aimbot Menu", function(on)
+createToggle("ESP", function(on)
     if on then
         -- Run the ESP script once when toggled ON
         loadstring(game:HttpGet("https://raw.githubusercontent.com/vin-2-real/VinsRbxMenu/refs/heads/main/esp"))()()
@@ -362,6 +345,12 @@ createToggle("Aimbot Menu", function(on)
         -- You can add code here to disable ESP if you have one
     end
 end, false)
+end
+
+
+
+
+
 
 -- Build UI initially
 buildUI()
@@ -409,4 +398,3 @@ UIS.InputBegan:Connect(function(input, gp)
         end
     end
 end)
-

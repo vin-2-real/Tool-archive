@@ -1,0 +1,78 @@
+import sys
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+
+
+class StaticBrowser(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("High-End Static Browser")
+        self.setMinimumSize(1000, 700)
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                  stop:0 #232526, stop:1 #414345);
+            }
+        """)
+
+        self.browser = QWebEngineView()
+
+        # Static HTML content
+        static_html = """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>High-End Static Page</title>
+            <style>
+                body {
+                    margin: 0;
+                    font-family: 'Segoe UI', sans-serif;
+                    background: linear-gradient(135deg, #2c3e50, #4ca1af);
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                }
+                .card {
+                    background: rgba(0, 0, 0, 0.6);
+                    padding: 40px;
+                    border-radius: 20px;
+                    box-shadow: 0 0 30px rgba(0,0,0,0.4);
+                    text-align: center;
+                }
+                .card h1 {
+                    font-size: 36px;
+                    margin-bottom: 10px;
+                }
+                .card p {
+                    font-size: 18px;
+                    opacity: 0.8;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h1>Welcome to the Static Page</h1>
+                <p>This is a high-end embedded UI using PyQt6 + QtWebEngine.</p>
+            </div>
+        </body>
+        </html>
+        """
+
+        self.browser.setHtml(static_html)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.browser)
+
+        container = QWidget()
+        container.setLayout(layout)
+        self.setCentralWidget(container)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = StaticBrowser()
+    window.show()
+    sys.exit(app.exec())
